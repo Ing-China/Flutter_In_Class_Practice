@@ -37,20 +37,27 @@ class _HomeScreenState extends State<HomeScreen> {
     return msg;
   }
 
-  String? _fullname;
-  String _image = 'default.png';
+  String _fullname = '';
+  String _profileImagePath = '';
 
   @override
   void initState() {
     super.initState();
-    _loadUserData(); // calling the method 
+    _loadUserData();
+  }
+
+  void _updateProfile() {
+    setState(() {
+      _loadUserData(); // Reload user data after edit
+    });
   }
 
   Future<void> _loadUserData() async {
     final sp = await SharedPreferences.getInstance();
     setState(() {
-      _fullname = sp.getString("USER_FULLNAME") ??  "Guest";
-      _image = sp.getString("USER_IMAGE")!;
+      _fullname = sp.getString('USER_FULLNAME') ?? 'Azula';
+      _profileImagePath =
+          sp.getString('USER_IMAGE') ?? 'assets/images/azula.jpg';
     });
   }
 
@@ -121,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-      drawer: const NavigationMenu(),
+      drawer: NavigationMenu(onProfileUpdated: _updateProfile),
       body: Container(
         color: AppColors.bgColor,
         child: Stack(
@@ -226,10 +233,16 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: const EdgeInsets.all(3.0),
                               child: ClipOval(
                                 child: Image.network(
-                                  '${AppUrl.url}images/$_image',
+                                  '${AppUrl.url}images/$_profileImagePath',
                                   fit: BoxFit.cover,
                                   width: 72,
                                   height: 72,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(
+                                    Icons.person,
+                                    size: 40,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
